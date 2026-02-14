@@ -26,9 +26,6 @@
   --red: #C41E3A;
   --red-dark: #A31830;
   --red-light: #D4354E;
-  --gold: #C5A258;
-  --gold-light: #D4B76A;
-  --gold-dark: #B08F45;
   --blue: #1D4ED8;
   --blue-light: #3B82F6;
   --blue-dark: #1E40AF;
@@ -133,7 +130,7 @@ h1, h2, h3, h4 {
   margin-bottom: var(--space-md);
 }
 
-.section-label--gold { color: var(--white); }
+.section-label--light { color: var(--white); }
 .section-label--red { color: var(--red); }
 .section-label--navy { color: var(--navy); }
 
@@ -190,11 +187,11 @@ h1, h2, h3, h4 {
   box-shadow: 0 6px 24px rgba(196, 30, 58, 0.35);
 }
 
-.btn--gold {
+.btn--white {
   background: var(--white);
   color: var(--navy);
 }
-.btn--gold:hover {
+.btn--white:hover {
   background: var(--cream);
   transform: translateY(-2px);
   box-shadow: 0 6px 24px rgba(255, 255, 255, 0.25);
@@ -219,18 +216,6 @@ h1, h2, h3, h4 {
 .btn--ghost-dark:hover {
   background: var(--navy);
   color: var(--text-light);
-}
-
-.btn--outline-gold {
-  background: transparent;
-  border: 1.5px solid rgba(255, 255, 255, 0.5);
-  color: var(--white);
-}
-.btn--outline-gold:hover {
-  background: var(--white);
-  color: var(--navy);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(255, 255, 255, 0.15);
 }
 
 /* ============================================
@@ -360,7 +345,7 @@ h1, h2, h3, h4 {
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--navy);
+  background: var(--white);
   z-index: 999;
   flex-direction: column;
   align-items: center;
@@ -380,7 +365,7 @@ h1, h2, h3, h4 {
   font-family: var(--font-serif);
   font-size: 28px;
   font-weight: 500;
-  color: var(--text-light);
+  color: var(--navy);
   transition: color var(--transition-fast);
 }
 
@@ -411,9 +396,9 @@ h1, h2, h3, h4 {
   position: absolute;
   inset: -10%;
   z-index: 1;
-  background-image: url('hero-bg.jpg');
+  background-image: url('Gemini_Generated_Image_1hom8x1hom8x1hom.png');
   background-size: cover;
-  background-position: center 30%;
+  background-position: center center;
   will-change: transform;
   transform: scale(1.05);
 }
@@ -621,6 +606,7 @@ h1, h2, h3, h4 {
   text-align: center;
   max-width: 880px;
   padding: var(--space-5xl) var(--space-lg);
+  padding-top: calc(var(--space-5xl) + 70px);
 }
 
 .hero__eyebrow {
@@ -1761,6 +1747,7 @@ h1, h2, h3, h4 {
 
   .hero__content {
     padding: var(--space-4xl) var(--space-lg);
+    padding-top: calc(var(--space-4xl) + 60px);
   }
 
   .hero__buttons {
@@ -1923,7 +1910,7 @@ h1, h2, h3, h4 {
       Direct democracy. Real accountability. No more excuses.
     </p>
     <div class="hero__buttons" id="heroButtons">
-      <a href="#join" class="btn btn--gold">Join Now &mdash; &pound;25/year</a>
+      <a href="#join" class="btn btn--white">Join Now &mdash; &pound;25/year</a>
       <button class="btn btn--ghost" id="watchBtn" type="button">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><polygon points="4,2 14,8 4,14"/></svg>
         Watch the Launch
@@ -1981,8 +1968,8 @@ h1, h2, h3, h4 {
         <div class="stat-card__label">Migrant hotels costing taxpayers billions every year</div>
       </div>
       <div class="stat-card reveal reveal-delay-2">
-        <div class="stat-card__number" data-count="0" data-suffix="">0</div>
-        <div class="stat-card__label">Accountability for the grooming gang scandal</div>
+        <div class="stat-card__number" data-count="0" data-suffix=" Convictions">0</div>
+        <div class="stat-card__label">Zero accountability for the grooming gang cover-up</div>
       </div>
       <div class="stat-card reveal reveal-delay-3">
         <div class="stat-card__number" data-count="2.7" data-prefix="&pound;" data-suffix="T" data-decimals="1">0</div>
@@ -2006,7 +1993,7 @@ h1, h2, h3, h4 {
 <section class="mission" id="mission">
   <div class="container">
     <div class="mission__header">
-      <div class="section-label section-label--gold reveal">Our Principles</div>
+      <div class="section-label section-label--light reveal">Our Principles</div>
       <h2 class="section-heading section-heading--light reveal">What We Stand For</h2>
       <p class="mission__subtitle reveal">Six pillars. No compromise. Every policy voted on by you.</p>
     </div>
@@ -2094,7 +2081,7 @@ h1, h2, h3, h4 {
     </div>
 
     <div class="media__featured reveal" role="button" tabindex="0" aria-label="Play video: Why I Founded Restore Britain" id="mediaPlayBtn">
-      <div class="media__featured-bg" style="background: url('https://pbs.twimg.com/amplify_video_thumb/2022384463435436032/img/VkZoBXjuAQYbFK3C.jpg') center/cover no-repeat;"></div>
+      <div class="media__featured-bg" style="background: url('hero-bg.jpg') center/cover no-repeat;"></div>
       <div class="media__featured-overlay">
         <div class="media__play-btn">
           <svg viewBox="0 0 24 24"><polygon points="6,3 21,12 6,21"/></svg>
@@ -2145,7 +2132,7 @@ h1, h2, h3, h4 {
 <section class="join" id="join">
   <div class="container">
     <div class="join__inner">
-      <div class="section-label section-label--gold reveal">Become a Member</div>
+      <div class="section-label section-label--light reveal">Become a Member</div>
       <h2 class="join__heading reveal">Join the Movement</h2>
       <p class="join__subtitle reveal"><strong>&pound;25/year.</strong> One member, one vote. Shape the future of Britain.</p>
 
@@ -2187,7 +2174,7 @@ h1, h2, h3, h4 {
           <input type="text" placeholder="Last name" aria-label="Last name">
         </div>
         <input type="email" placeholder="Email address" aria-label="Email address" style="width:100%; margin-bottom: var(--space-md);">
-        <button type="submit" class="btn btn--gold">Join Restore Britain</button>
+        <button type="submit" class="btn btn--white">Join Restore Britain</button>
         <p class="join__form-note">Membership is &pound;25/year. You'll receive a confirmation email to complete your registration.</p>
       </form>
     </div>
