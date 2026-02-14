@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Restore Britain — It's Time.</title>
 <meta name="description" content="Restore Britain. A movement of the British people. Direct democracy. Real accountability. No more excuses.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><path d='M18 3L21 8L27 6L24 12L30 15L24 18L27 24L21 22L18 28L15 22L9 24L12 18L6 15L12 12L9 6L15 8L18 3Z' fill='%23C5A258'/><path d='M18 10C18 10 22 14 22 18C22 22 18 26 18 26C18 26 14 22 14 18C14 14 18 10 18 10Z' fill='%23C41E3A'/></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%230A1628'/><text x='16' y='22' text-anchor='middle' font-size='18' font-weight='bold' fill='white' font-family='serif'>RB</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Source+Sans+3:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -29,6 +29,9 @@
   --gold: #C5A258;
   --gold-light: #D4B76A;
   --gold-dark: #B08F45;
+  --blue: #1D4ED8;
+  --blue-light: #3B82F6;
+  --blue-dark: #1E40AF;
   --cream: #F5F2EB;
   --cream-dark: #E8E4DB;
   --white: #FEFDFB;
@@ -130,7 +133,7 @@ h1, h2, h3, h4 {
   margin-bottom: var(--space-md);
 }
 
-.section-label--gold { color: var(--gold); }
+.section-label--gold { color: var(--white); }
 .section-label--red { color: var(--red); }
 .section-label--navy { color: var(--navy); }
 
@@ -188,13 +191,13 @@ h1, h2, h3, h4 {
 }
 
 .btn--gold {
-  background: var(--gold);
+  background: var(--white);
   color: var(--navy);
 }
 .btn--gold:hover {
-  background: var(--gold-light);
+  background: var(--cream);
   transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(197, 162, 88, 0.35);
+  box-shadow: 0 6px 24px rgba(255, 255, 255, 0.25);
 }
 
 .btn--ghost {
@@ -220,14 +223,14 @@ h1, h2, h3, h4 {
 
 .btn--outline-gold {
   background: transparent;
-  border: 1.5px solid var(--gold);
-  color: var(--gold);
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  color: var(--white);
 }
 .btn--outline-gold:hover {
-  background: var(--gold);
+  background: var(--white);
   color: var(--navy);
   transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(197, 162, 88, 0.2);
+  box-shadow: 0 6px 24px rgba(255, 255, 255, 0.15);
 }
 
 /* ============================================
@@ -248,7 +251,7 @@ h1, h2, h3, h4 {
   background: rgba(10, 22, 40, 0.95);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(197, 162, 88, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .nav__inner {
@@ -264,29 +267,9 @@ h1, h2, h3, h4 {
   z-index: 1001;
 }
 
-.nav__logo-icon {
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.nav__logo-icon svg {
-  width: 100%;
-  height: 100%;
-}
-
-.nav__logo-text {
-  font-family: var(--font-serif);
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--text-light);
-  letter-spacing: 0.02em;
-}
-
-.nav__logo-text span {
-  color: var(--gold);
+.nav__logo-img {
+  height: 40px;
+  width: auto;
 }
 
 .nav__links {
@@ -314,7 +297,7 @@ h1, h2, h3, h4 {
   left: 0;
   width: 0;
   height: 1.5px;
-  background: var(--gold);
+  background: var(--red);
   transition: width var(--transition-med);
 }
 
@@ -399,7 +382,7 @@ h1, h2, h3, h4 {
 }
 
 .nav__mobile a:hover {
-  color: var(--gold);
+  color: var(--red);
 }
 
 .nav__mobile .btn {
@@ -528,7 +511,7 @@ h1, h2, h3, h4 {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: rgba(197, 162, 88, 0.6);
+  background: rgba(255, 255, 255, 0.5);
   will-change: transform, opacity;
   animation: particleFloat ease-in-out infinite;
 }
@@ -599,7 +582,7 @@ h1, h2, h3, h4 {
   height: 350px;
   top: 50%;
   right: 10%;
-  background: rgba(197, 162, 88, 0.05);
+  background: rgba(29, 78, 216, 0.06);
   animation-delay: 2.5s;
 }
 
@@ -608,7 +591,7 @@ h1, h2, h3, h4 {
   height: 300px;
   bottom: 10%;
   left: 40%;
-  background: rgba(197, 162, 88, 0.04);
+  background: rgba(255, 255, 255, 0.04);
   animation-delay: 5s;
 }
 
@@ -646,7 +629,7 @@ h1, h2, h3, h4 {
   font-weight: 600;
   letter-spacing: 0.25em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: rgba(255, 255, 255, 0.7);
   margin-bottom: var(--space-xl);
   opacity: 0;
   transform: translateY(16px);
@@ -657,7 +640,7 @@ h1, h2, h3, h4 {
   content: '';
   width: 32px;
   height: 1px;
-  background: var(--gold);
+  background: rgba(255, 255, 255, 0.4);
   opacity: 0.5;
 }
 
@@ -673,7 +656,7 @@ h1, h2, h3, h4 {
 
 .hero__title em {
   font-style: italic;
-  color: var(--gold);
+  color: var(--white);
 }
 
 .hero__subtitle {
@@ -790,9 +773,9 @@ h1, h2, h3, h4 {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: var(--gold);
+  background: var(--white);
   flex-shrink: 0;
-  opacity: 0.8;
+  opacity: 0.6;
 }
 
 @keyframes marqueeScroll {
@@ -901,7 +884,7 @@ h1, h2, h3, h4 {
   inset: 0;
   background:
     radial-gradient(ellipse 60% 40% at 0% 100%, rgba(196, 30, 58, 0.05) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 50% at 100% 0%, rgba(197, 162, 88, 0.04) 0%, transparent 50%);
+    radial-gradient(ellipse 50% 50% at 100% 0%, rgba(29, 78, 216, 0.04) 0%, transparent 50%);
   pointer-events: none;
 }
 
@@ -930,7 +913,7 @@ h1, h2, h3, h4 {
 
 .pillar-card {
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(197, 162, 88, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-md);
   padding: var(--space-xl) var(--space-lg);
   transition: all var(--transition-med) cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -944,16 +927,16 @@ h1, h2, h3, h4 {
   left: var(--space-lg);
   right: var(--space-lg);
   height: 1px;
-  background: linear-gradient(to right, transparent, var(--gold), transparent);
+  background: linear-gradient(to right, transparent, var(--red), transparent);
   opacity: 0;
   transition: opacity var(--transition-med);
 }
 
 .pillar-card:hover {
   background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(197, 162, 88, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
   transform: translateY(-3px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(197, 162, 88, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 .pillar-card:hover::after {
@@ -967,14 +950,14 @@ h1, h2, h3, h4 {
   align-items: center;
   justify-content: center;
   margin-bottom: var(--space-md);
-  color: var(--gold);
+  color: var(--red);
   font-size: 24px;
 }
 
 .pillar-card__icon svg {
   width: 28px;
   height: 28px;
-  stroke: var(--gold);
+  stroke: var(--red);
   fill: none;
   stroke-width: 1.5;
   stroke-linecap: round;
@@ -1030,8 +1013,8 @@ h1, h2, h3, h4 {
   transform: translateX(-50%);
   font-size: 80px;
   font-style: normal;
-  color: var(--gold);
-  opacity: 0.3;
+  color: var(--red);
+  opacity: 0.2;
   line-height: 1;
   font-family: var(--font-serif);
 }
@@ -1051,7 +1034,7 @@ h1, h2, h3, h4 {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--gold);
+  color: var(--white);
   font-family: var(--font-serif);
   font-size: 20px;
   font-weight: 700;
@@ -1158,7 +1141,7 @@ h1, h2, h3, h4 {
   font-weight: 500;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: rgba(255, 255, 255, 0.7);
   margin-top: var(--space-sm);
 }
 
@@ -1166,8 +1149,8 @@ h1, h2, h3, h4 {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background:
-    radial-gradient(ellipse at center, rgba(22, 37, 64, 1) 0%, var(--navy) 100%);
+  background-size: cover;
+  background-position: center;
 }
 
 /* Thumbnail grid */
@@ -1310,7 +1293,7 @@ h1, h2, h3, h4 {
 }
 
 .join__subtitle strong {
-  color: var(--gold);
+  color: var(--white);
   font-weight: 600;
 }
 
@@ -1338,14 +1321,14 @@ h1, h2, h3, h4 {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--gold);
+  color: var(--red);
   margin-top: 2px;
 }
 
 .join__benefit-icon svg {
   width: 18px;
   height: 18px;
-  stroke: var(--gold);
+  stroke: var(--red);
   fill: none;
   stroke-width: 2.5;
 }
@@ -1368,7 +1351,7 @@ h1, h2, h3, h4 {
   font-family: var(--font-serif);
   font-size: clamp(48px, 6vw, 72px);
   font-weight: 700;
-  color: var(--gold);
+  color: var(--white);
   line-height: 1;
   margin-bottom: var(--space-sm);
 }
@@ -1412,9 +1395,9 @@ h1, h2, h3, h4 {
 }
 
 .join__form input:focus {
-  border-color: var(--gold);
+  border-color: var(--red);
   background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 0 0 3px rgba(197, 162, 88, 0.12);
+  box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.15);
 }
 
 .join__form .btn {
@@ -1550,7 +1533,7 @@ h1, h2, h3, h4 {
 }
 
 .footer__logo-text span {
-  color: var(--gold);
+  font-weight: 700;
 }
 
 .footer__tagline {
@@ -1571,7 +1554,7 @@ h1, h2, h3, h4 {
   font-weight: 600;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: rgba(255, 255, 255, 0.5);
   margin-bottom: var(--space-md);
 }
 
@@ -1602,7 +1585,7 @@ h1, h2, h3, h4 {
   font-weight: 600;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: rgba(255, 255, 255, 0.5);
   margin-bottom: var(--space-md);
 }
 
@@ -1642,10 +1625,10 @@ h1, h2, h3, h4 {
 }
 
 .footer__social a:hover {
-  border-color: var(--gold);
-  color: var(--gold);
+  border-color: var(--white);
+  color: var(--white);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(197, 162, 88, 0.15);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
 }
 
 .footer__social svg {
@@ -1864,14 +1847,7 @@ h1, h2, h3, h4 {
 <nav class="nav" id="nav">
   <div class="container nav__inner">
     <a href="#" class="nav__logo">
-      <div class="nav__logo-icon">
-        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M18 3L21 8L27 6L24 12L30 15L24 18L27 24L21 22L18 28L15 22L9 24L12 18L6 15L12 12L9 6L15 8L18 3Z" fill="#C5A258" opacity="0.9"/>
-          <path d="M18 10C18 10 22 14 22 18C22 22 18 26 18 26C18 26 14 22 14 18C14 14 18 10 18 10Z" fill="#C41E3A" opacity="0.8"/>
-          <circle cx="18" cy="18" r="3" fill="#F5F2EB" opacity="0.9"/>
-        </svg>
-      </div>
-      <div class="nav__logo-text">Restore <span>Britain</span></div>
+      <img src="1.png" alt="Restore Britain" class="nav__logo-img">
     </a>
 
     <ul class="nav__links">
@@ -2227,24 +2203,24 @@ h1, h2, h3, h4 {
 
     <div class="news__grid">
       <article class="news-card reveal reveal-delay-1">
-        <div class="news-card__date">February 2026</div>
-        <h3 class="news-card__title">Restore Britain Officially Becomes a Political Party</h3>
-        <p class="news-card__excerpt">After months of groundwork, Restore Britain is now officially registered with the Electoral Commission. The movement becomes a party.</p>
-        <a href="#" class="news-card__link">Read more <span>&rarr;</span></a>
+        <div class="news-card__date">January 2026</div>
+        <h3 class="news-card__title">England Spends up to &pound;80 Million per Year on Healthcare for Illegal Migrants</h3>
+        <p class="news-card__excerpt">Our research reveals that England's NHS has allocated approximately &pound;80.8 million annually since 2018 to hospital treatment for individuals without legal immigration status.</p>
+        <a href="https://www.restorebritain.org.uk/news" target="_blank" class="news-card__link">Read more <span>&rarr;</span></a>
       </article>
 
       <article class="news-card reveal reveal-delay-2">
         <div class="news-card__date">January 2026</div>
-        <h3 class="news-card__title">The Great Repeal Act: Our Plan for 2029</h3>
-        <p class="news-card__excerpt">Our flagship policy laid bare — a comprehensive plan to repeal decades of overreach and return power to the British people.</p>
-        <a href="#" class="news-card__link">Read more <span>&rarr;</span></a>
+        <h3 class="news-card__title">Restoring the British Pub &ndash; Our Latest Policy Paper</h3>
+        <p class="news-card__excerpt">Practical measures to reverse the decline of British pubs through reforms targeting business rates, VAT, alcohol duties, and regulatory barriers.</p>
+        <a href="https://www.restorebritain.org.uk/news" target="_blank" class="news-card__link">Read more <span>&rarr;</span></a>
       </article>
 
       <article class="news-card reveal reveal-delay-3">
-        <div class="news-card__date">December 2025</div>
-        <h3 class="news-card__title">50,000 Members: A Movement That Cannot Be Ignored</h3>
-        <p class="news-card__excerpt">In just weeks, Restore Britain has crossed 50,000 members — faster than any new political party in modern British history.</p>
-        <a href="#" class="news-card__link">Read more <span>&rarr;</span></a>
+        <div class="news-card__date">November 2025</div>
+        <h3 class="news-card__title">Voting Intention: 10% Support in National Polling</h3>
+        <p class="news-card__excerpt">A survey of 1,000 British adults found that a political party led by Rupert Lowe MP would garner 10% voter support in a general election.</p>
+        <a href="https://www.restorebritain.org.uk/news" target="_blank" class="news-card__link">Read more <span>&rarr;</span></a>
       </article>
     </div>
   </div>
@@ -2268,12 +2244,7 @@ h1, h2, h3, h4 {
     <div class="footer__inner">
       <div class="footer__brand">
         <div class="footer__logo">
-          <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
-            <path d="M18 3L21 8L27 6L24 12L30 15L24 18L27 24L21 22L18 28L15 22L9 24L12 18L6 15L12 12L9 6L15 8L18 3Z" fill="#C5A258" opacity="0.9"/>
-            <path d="M18 10C18 10 22 14 22 18C22 22 18 26 18 26C18 26 14 22 14 18C14 14 18 10 18 10Z" fill="#C41E3A" opacity="0.8"/>
-            <circle cx="18" cy="18" r="3" fill="#F5F2EB" opacity="0.9"/>
-          </svg>
-          <div class="footer__logo-text">Restore <span>Britain</span></div>
+          <img src="1.png" alt="Restore Britain" style="height: 36px; width: auto;">
         </div>
         <p class="footer__tagline">A movement of the British people. Direct democracy. Real accountability.</p>
       </div>
