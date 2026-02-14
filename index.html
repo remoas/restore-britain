@@ -2105,7 +2105,7 @@ h1, h2, h3, h4 {
     </div>
 
     <div class="media__thumbs">
-      <div class="media__thumb reveal reveal-delay-1" role="button" tabindex="0" aria-label="Play video: On Immigration">
+      <div class="media__thumb reveal reveal-delay-1" role="button" tabindex="0" aria-label="Play video: On Immigration" data-tweet="https://x.com/RupertLowe10/status/2006999939482853682" style="background: url('https://pbs.twimg.com/amplify_video_thumb/2006999652881608704/img/TIrjBfcKRKV-IwOJ.jpg') center/cover no-repeat;">
         <div class="media__thumb-overlay">
           <div class="media__thumb-play">
             <svg viewBox="0 0 24 24"><polygon points="6,3 21,12 6,21"/></svg>
@@ -2571,11 +2571,11 @@ h1, h2, h3, h4 {
     var mediaPlayBtn = document.getElementById('mediaPlayBtn');
     if (!modal || !embed) return;
 
-    var tweetUrl = 'https://x.com/RupertLowe10/status/2022394419685822647';
+    var defaultTweetUrl = 'https://x.com/RupertLowe10/status/2022394419685822647';
 
-    function openModal() {
+    function openModal(url) {
+      var tweetUrl = url || defaultTweetUrl;
       embed.innerHTML = '<blockquote class="twitter-tweet" data-media-max-width="800"><a href="' + tweetUrl + '"></a></blockquote>';
-      // Load Twitter widget script
       if (!window.twttr) {
         var s = document.createElement('script');
         s.src = 'https://platform.twitter.com/widgets.js';
@@ -2594,9 +2594,16 @@ h1, h2, h3, h4 {
       setTimeout(function() { embed.innerHTML = ''; }, 350);
     }
 
-    if (watchBtn) watchBtn.addEventListener('click', openModal);
-    if (mediaPlayBtn) mediaPlayBtn.addEventListener('click', openModal);
+    if (watchBtn) watchBtn.addEventListener('click', function() { openModal(); });
+    if (mediaPlayBtn) mediaPlayBtn.addEventListener('click', function() { openModal(); });
     if (closeBtn) closeBtn.addEventListener('click', closeModal);
+
+    // Thumbnails with data-tweet attribute
+    document.querySelectorAll('[data-tweet]').forEach(function(thumb) {
+      thumb.addEventListener('click', function() {
+        openModal(this.getAttribute('data-tweet'));
+      });
+    });
 
     modal.addEventListener('click', function(e) {
       if (e.target === modal) closeModal();
