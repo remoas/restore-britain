@@ -13,8 +13,8 @@ let package = Package(
         )
     ],
     dependencies: [
-        // OpenClaw Swift SDK
-        .package(url: "https://github.com/openclaw/openclaw-swift-sdk.git", from: "1.0.0"),
+        // Our OpenClaw Swift SDK (local package)
+        .package(path: "../OpenClawSDK"),
         // Keychain access for secure token storage
         .package(url: "https://github.com/kishikawakatsumi/KeychainAccess.git", from: "4.2.2"),
     ],
@@ -22,7 +22,7 @@ let package = Package(
         .target(
             name: "OpenClawLarry",
             dependencies: [
-                .product(name: "OpenClawSDK", package: "openclaw-swift-sdk"),
+                "OpenClawSDK",
                 "KeychainAccess",
             ],
             path: "Sources"

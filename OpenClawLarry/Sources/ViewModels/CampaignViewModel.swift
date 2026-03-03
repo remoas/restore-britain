@@ -4,7 +4,9 @@ import Foundation
 final class CampaignViewModel: ObservableObject {
     @Published var isRunning = false
     @Published var errorMessage: String?
-    @Published var lastRunPosts: [TikTokPost] = []
+
+    /// Larry's latest response (natural language — not structured data).
+    @Published var lastRunResponse: String = ""
 
     private let campaignStore: CampaignStore
     private let openClawService: OpenClawService
@@ -50,20 +52,25 @@ final class CampaignViewModel: ObservableObject {
         return campaign
     }
 
-    /// Start a campaign: tell Larry to generate and post content.
+    /// Start a campaign: send instructions to Larry via the OpenClaw Gateway.
+    ///
+    /// Larry is an AI skill — it runs autonomously on the OpenClaw server.
+    /// We send a natural language instruction via /v1/chat/completions and
+    /// Larry researches, generates, and posts content. The response is text.
     func runCampaign(_ campaign: Campaign) async {
         guard openClawService.connectionStatus.isConnected else {
-            errorMessage = "Connect to your OpenClaw server first."
+            errorMessage = "Connect to your OpenClaw Gateway first."
             return
         }
 
         guard openClawService.isLarryInstalled else {
-            errorMessage = "Install the Larry skill on your OpenClaw server first."
+            errorMessage = "Select an agent with the Larry skill in Settings."
             return
         }
 
         isRunning = true
         errorMessage = nil
+        lastRunResponse = ""
         defer { isRunning = false }
 
         do {
@@ -73,13 +80,11 @@ final class CampaignViewModel: ObservableObject {
             updated.lastRunAt = Date()
             campaignStore.updateCampaign(updated)
 
-            // Tell Larry to generate posts
-            let posts = try await openClawService.runCampaign(campaign)
-            lastRunPosts = posts
-            campaignStore.addPosts(posts, for: campaign.id)
+            // Tell Larry to run the campaign — response is natural language
+            let response = try await openClawService.runCampaign(campaign)
+            lastRunResponse = response
         } catch {
             errorMessage = error.localizedDescription
-            // Revert status on failure
             var reverted = campaign
             reverted.status = .paused
             campaignStore.updateCampaign(reverted)

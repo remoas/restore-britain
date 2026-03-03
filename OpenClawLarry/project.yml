@@ -14,8 +14,7 @@ settings:
 
 packages:
   OpenClawSDK:
-    url: https://github.com/openclaw/openclaw-swift-sdk.git
-    from: 1.0.0
+    path: ../OpenClawSDK
   KeychainAccess:
     url: https://github.com/kishikawakatsumi/KeychainAccess.git
     from: 4.2.2

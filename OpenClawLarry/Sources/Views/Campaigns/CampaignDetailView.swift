@@ -8,14 +8,9 @@ struct CampaignDetailView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                // Status + controls
                 statusSection
-
-                // Stats overview
                 statsSection
-
-                // Recent posts
-                postsSection
+                larryResponseSection
             }
             .padding()
         }
@@ -63,7 +58,7 @@ struct CampaignDetailView: View {
                     } else {
                         Image(systemName: "play.fill")
                     }
-                    Text(viewModel.isRunning ? "Generating..." : "Run Campaign Now")
+                    Text(viewModel.isRunning ? "Larry is working..." : "Run Campaign Now")
                 }
                 .frame(maxWidth: .infinity)
             }
@@ -86,84 +81,56 @@ struct CampaignDetailView: View {
 
     private var statsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Performance")
+            Text("Campaign Info")
                 .font(.headline)
 
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                StatCard(title: "Total Posts", value: "\(campaign.totalPosts)", icon: "square.stack.fill", color: .purple)
-                StatCard(title: "Total Views", value: formatNumber(campaign.totalViews), icon: "eye.fill", color: .blue)
-                StatCard(title: "Likes", value: formatNumber(campaign.totalLikes), icon: "heart.fill", color: .red)
-                StatCard(title: "Shares", value: formatNumber(campaign.totalShares), icon: "arrowshape.turn.up.right.fill", color: .green)
+            VStack(alignment: .leading, spacing: 8) {
+                infoRow(label: "Niche", value: campaign.niche)
+                infoRow(label: "Target Audience", value: campaign.targetAudience)
+                infoRow(label: "Posts/Day", value: "\(campaign.postsPerDay)")
+                infoRow(label: "Image Style", value: campaign.imageStyle.displayName)
+
+                if !campaign.competitorAccounts.isEmpty {
+                    infoRow(label: "Competitors", value: campaign.competitorAccounts.joined(separator: ", "))
+                }
             }
+            .padding()
+            .background(Color(.secondarySystemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
         }
     }
 
-    // MARK: - Posts
+    private func infoRow(label: String, value: String) -> some View {
+        HStack(alignment: .top) {
+            Text(label)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .frame(width: 100, alignment: .leading)
+            Text(value)
+                .font(.subheadline)
+        }
+    }
 
-    private var postsSection: some View {
+    // MARK: - Larry Response
+
+    private var larryResponseSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Recent Posts")
+            Text("Larry's Report")
                 .font(.headline)
 
-            let posts = campaignStore.postsForCampaign(campaign.id)
-
-            if posts.isEmpty {
-                Text("No posts yet. Run the campaign to generate content.")
+            if viewModel.lastRunResponse.isEmpty {
+                Text("Run the campaign to see Larry's output. Larry will research competitors, generate slideshows, and report back.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .padding()
             } else {
-                ForEach(posts.prefix(10)) { post in
-                    PostRow(post: post)
-                }
+                Text(viewModel.lastRunResponse)
+                    .font(.body)
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color(.secondarySystemBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
             }
         }
-    }
-
-    private func formatNumber(_ n: Int) -> String {
-        if n >= 1_000_000 { return String(format: "%.1fM", Double(n) / 1_000_000) }
-        if n >= 1_000 { return String(format: "%.1fK", Double(n) / 1_000) }
-        return "\(n)"
-    }
-}
-
-struct PostRow: View {
-    let post: TikTokPost
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Text(post.caption)
-                    .font(.subheadline)
-                    .lineLimit(2)
-                Spacer()
-                Text(post.status.displayName)
-                    .font(.caption2.bold())
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Color.secondary.opacity(0.1))
-                    .clipShape(Capsule())
-            }
-
-            if !post.hashtags.isEmpty {
-                Text(post.hashtags.map { "#\($0)" }.joined(separator: " "))
-                    .font(.caption)
-                    .foregroundStyle(.blue)
-            }
-
-            if post.status == .published {
-                HStack(spacing: 12) {
-                    Label("\(post.views)", systemImage: "eye")
-                    Label("\(post.likes)", systemImage: "heart")
-                    Label("\(post.comments)", systemImage: "bubble.right")
-                    Label(String(format: "%.1f%%", post.engagementRate), systemImage: "chart.bar")
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            }
-        }
-        .padding()
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 }

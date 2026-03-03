@@ -1,64 +1,90 @@
 import Foundation
-import Combine
+import OpenClawSDK
 
-/// Manages the connection to the user's OpenClaw instance and the Larry skill.
+/// Manages the connection to the user's OpenClaw Gateway and runs the Larry skill
+/// by sending natural language messages to an agent that has Larry installed.
+///
+/// How it works:
+/// 1. User provides their Gateway URL + bearer token (from ~/.openclaw/openclaw.json)
+/// 2. We connect via the OpenAI-compatible /v1/chat/completions endpoint
+/// 3. We select the agent that has the Larry skill via the `model` field
+/// 4. Campaign instructions are sent as chat messages — Larry handles the rest
 @MainActor
 final class OpenClawService: ObservableObject {
     @Published var connectionStatus: ConnectionStatus = .disconnected
     @Published var isLarryInstalled = false
+    @Published var availableAgents: [ModelInfo] = []
+    @Published var selectedAgentId: String?
 
-    private var config: OpenClawConfig?
-    private let session: URLSession
+    /// Streaming response text for the current operation.
+    @Published var streamingText: String = ""
+
+    private var client: OpenClawClient?
+    private var larrySession: AgentSession?
     private let keychain: KeychainStore
 
     init(keychain: KeychainStore = .shared) {
         self.keychain = keychain
-        let config = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = 30
-        self.session = URLSession(configuration: config)
     }
 
     // MARK: - Connection
 
-    /// Connect to an OpenClaw instance with the given URL and API key.
+    /// Connect to an OpenClaw Gateway with a URL and bearer token.
+    ///
+    /// The token is the `gateway.auth.token` from the user's `~/.openclaw/openclaw.json`.
+    /// The Gateway must have `gateway.http.endpoints.chatCompletions.enabled: true`.
     func connect(serverURL: URL, apiKey: String) async throws {
         connectionStatus = .connecting
 
+        let newClient = OpenClawClient(gatewayURL: serverURL, token: apiKey)
+
+        // Verify connection by hitting /v1/models
+        do {
+            let isHealthy = try await newClient.healthCheck()
+            guard isHealthy else {
+                connectionStatus = .error("Gateway did not respond.")
+                throw OpenClawError.connectionFailed
+            }
+        } catch let error as OpenClawSDKError {
+            switch error {
+            case .endpointNotEnabled:
+                connectionStatus = .error("Chat completions endpoint is disabled. Enable it in your openclaw.json.")
+            case .unauthorized:
+                connectionStatus = .error("Invalid gateway token.")
+            default:
+                connectionStatus = .error(error.localizedDescription)
+            }
+            throw OpenClawError.connectionFailed
+        }
+
+        self.client = newClient
+
+        // Save credentials
         let config = OpenClawConfig(
             serverURL: serverURL,
             apiKey: apiKey,
             larrySkillId: OpenClawConfig.defaultLarrySkillId
         )
-
-        // Validate connection by hitting the health endpoint
-        var request = URLRequest(url: serverURL.appendingPathComponent("/api/health"))
-        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-
-        let (_, response) = try await session.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse,
-              httpResponse.statusCode == 200 else {
-            connectionStatus = .error("Failed to connect. Check your server URL and API key.")
-            throw OpenClawError.connectionFailed
-        }
-
-        self.config = config
         try keychain.saveOpenClawConfig(config)
-        connectionStatus = .connected
 
-        // Check if Larry is installed
-        await checkLarrySkill()
+        // List available agents to find one with Larry
+        await loadAgents()
+
+        connectionStatus = .connected
     }
 
-    /// Disconnect from the current OpenClaw instance.
+    /// Disconnect and clear credentials.
     func disconnect() {
-        config = nil
+        client = nil
+        larrySession = nil
         keychain.deleteOpenClawConfig()
         connectionStatus = .disconnected
         isLarryInstalled = false
+        availableAgents = []
+        selectedAgentId = nil
     }
 
-    /// Attempt to restore a saved connection on app launch.
+    /// Restore a saved connection on app launch.
     func restoreConnection() async {
         guard let savedConfig = keychain.loadOpenClawConfig() else { return }
         do {
@@ -68,120 +94,155 @@ final class OpenClawService: ObservableObject {
         }
     }
 
-    // MARK: - Larry Skill
+    // MARK: - Agent Discovery
 
-    /// Check whether the Larry skill is installed on the connected OpenClaw instance.
-    func checkLarrySkill() async {
-        guard let config = config else { return }
-
-        let url = config.serverURL.appendingPathComponent("/api/skills")
-        var request = URLRequest(url: url)
-        request.setValue("Bearer \(config.apiKey)", forHTTPHeaderField: "Authorization")
+    /// List models/agents on the Gateway and check for a Larry-configured agent.
+    func loadAgents() async {
+        guard let client else { return }
 
         do {
-            let (data, _) = try await session.data(for: request)
-            let skills = try JSONDecoder().decode([SkillInfo].self, from: data)
-            isLarryInstalled = skills.contains { $0.id == config.larrySkillId }
+            let models = try await client.listModels()
+            availableAgents = models
+
+            // Look for an agent with "larry" in the ID or name
+            if let larryAgent = models.first(where: {
+                $0.id.localizedCaseInsensitiveContains("larry")
+            }) {
+                selectedAgentId = larryAgent.id
+                isLarryInstalled = true
+            } else if let firstAgent = models.first(where: {
+                $0.id.hasPrefix("openclaw:") || $0.id.hasPrefix("agent:")
+            }) {
+                // Fall back to the first OpenClaw agent — user may have Larry
+                // installed under a custom agent name
+                selectedAgentId = firstAgent.id
+                isLarryInstalled = true
+            }
         } catch {
-            isLarryInstalled = false
+            availableAgents = []
         }
     }
 
-    /// Install the Larry skill on the connected OpenClaw instance.
-    func installLarrySkill() async throws {
-        guard let config = config else { throw OpenClawError.notConnected }
+    /// Select a specific agent ID to use for Larry operations.
+    func selectAgent(_ agentId: String) {
+        selectedAgentId = agentId
+        larrySession = nil // Reset session for new agent
+        isLarryInstalled = true
+    }
 
-        let url = config.serverURL.appendingPathComponent("/api/skills/install")
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("Bearer \(config.apiKey)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    // MARK: - Larry Session
 
-        let body = ["skill_id": config.larrySkillId]
-        request.httpBody = try JSONEncoder().encode(body)
+    /// Get or create a persistent session with the Larry agent.
+    private func getLarrySession() throws -> AgentSession {
+        guard let client else { throw OpenClawError.notConnected }
+        guard let agentId = selectedAgentId else { throw OpenClawError.larryNotInstalled }
 
-        let (_, response) = try await session.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse,
-              httpResponse.statusCode == 200 else {
-            throw OpenClawError.skillInstallFailed
+        if let existing = larrySession {
+            return existing
         }
 
-        isLarryInstalled = true
+        let session = AgentSession(
+            client: client,
+            agentId: agentId,
+            systemPrompt: """
+            You are running the Larry skill for TikTok slideshow marketing automation. \
+            Execute campaign instructions precisely. When generating content, return structured \
+            results including captions, hashtags, and image descriptions. When posting, confirm \
+            the post status and any analytics available.
+            """
+        )
+        larrySession = session
+        return session
     }
 
     // MARK: - Campaign Execution
 
-    /// Tell Larry to run a campaign (generate content, create slides, post).
-    func runCampaign(_ campaign: Campaign) async throws -> [TikTokPost] {
-        guard let config = config else { throw OpenClawError.notConnected }
-        guard isLarryInstalled else { throw OpenClawError.larryNotInstalled }
+    /// Tell Larry to run a campaign by sending a natural language instruction.
+    ///
+    /// Larry is an OpenClaw skill — it runs on the server. We instruct it via chat.
+    /// The agent researches competitors, generates images, adds overlays, and posts.
+    func runCampaign(_ campaign: Campaign) async throws -> String {
+        let session = try getLarrySession()
 
-        let url = config.serverURL.appendingPathComponent("/api/skills/\(config.larrySkillId)/run")
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("Bearer \(config.apiKey)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.timeoutInterval = 120
+        let instruction = """
+        Run a TikTok slideshow campaign with these settings:
+        - Niche: \(campaign.niche)
+        - Target audience: \(campaign.targetAudience)
+        - Competitor accounts to research: \(campaign.competitorAccounts.joined(separator: ", "))
+        - Number of posts to generate: \(campaign.postsPerDay)
+        - Image style: \(campaign.imageStyle.rawValue)
+        - Text overlay position: \(campaign.overlayConfig.position.rawValue)
+        \(campaign.postizAccountId.map { "- Post via Postiz account: \($0)" } ?? "- Do not post yet, just generate the content")
 
-        let payload = CampaignRunPayload(
-            niche: campaign.niche,
-            competitors: campaign.competitorAccounts,
-            postsToGenerate: campaign.postsPerDay,
-            imageStyle: campaign.imageStyle.rawValue,
-            overlayConfig: campaign.overlayConfig,
-            postizAccountId: campaign.postizAccountId
-        )
-        request.httpBody = try JSONEncoder().encode(payload)
+        Research the competitors, generate \(campaign.postsPerDay) slideshow posts with AI images and text overlays, and report back with the results.
+        """
 
-        let (data, _) = try await session.data(for: request)
-        return try JSONDecoder().decode([TikTokPost].self, from: data)
+        let response = try await session.send(instruction)
+        return response.content
     }
 
-    /// Fetch analytics for published posts from the OpenClaw instance.
-    func fetchAnalytics(for campaignId: UUID) async throws -> [TikTokPost] {
-        guard let config = config else { throw OpenClawError.notConnected }
+    /// Run a campaign with streaming response, updating `streamingText` in real time.
+    func runCampaignStreaming(_ campaign: Campaign) async throws {
+        let session = try getLarrySession()
+        streamingText = ""
 
-        let url = config.serverURL.appendingPathComponent("/api/skills/\(config.larrySkillId)/analytics/\(campaignId.uuidString)")
-        var request = URLRequest(url: url)
-        request.setValue("Bearer \(config.apiKey)", forHTTPHeaderField: "Authorization")
+        let instruction = """
+        Run a TikTok slideshow campaign:
+        - Niche: \(campaign.niche)
+        - Target audience: \(campaign.targetAudience)
+        - Competitors: \(campaign.competitorAccounts.joined(separator: ", "))
+        - Posts to generate: \(campaign.postsPerDay)
+        - Image style: \(campaign.imageStyle.rawValue)
 
-        let (data, _) = try await session.data(for: request)
-        return try JSONDecoder().decode([TikTokPost].self, from: data)
+        Research competitors, generate \(campaign.postsPerDay) slideshows, and report results.
+        """
+
+        let stream = try await session.stream(instruction)
+        for try await chunk in stream {
+            if let content = chunk.content {
+                streamingText += content
+            }
+        }
+    }
+
+    /// Ask Larry for analytics on a campaign's published posts.
+    func fetchAnalytics(for campaign: Campaign) async throws -> String {
+        let session = try getLarrySession()
+
+        let response = try await session.send(
+            "Check the TikTok analytics for campaign '\(campaign.name)' in the \(campaign.niche) niche. Report views, likes, shares, comments, and engagement rate for each post."
+        )
+        return response.content
+    }
+
+    /// Send a freeform message to the Larry agent.
+    func chat(_ message: String) async throws -> String {
+        let session = try getLarrySession()
+        let response = try await session.send(message)
+        return response.content
+    }
+
+    /// Reset the Larry conversation session.
+    func resetSession() {
+        larrySession?.reset()
+        larrySession = nil
     }
 }
 
-// MARK: - Supporting Types
+// MARK: - Errors
 
 enum OpenClawError: LocalizedError {
     case connectionFailed
     case notConnected
     case larryNotInstalled
-    case skillInstallFailed
     case campaignRunFailed
 
     var errorDescription: String? {
         switch self {
-        case .connectionFailed: return "Failed to connect to your OpenClaw server."
-        case .notConnected: return "Not connected to an OpenClaw server."
-        case .larryNotInstalled: return "The Larry skill is not installed."
-        case .skillInstallFailed: return "Failed to install the Larry skill."
+        case .connectionFailed: return "Failed to connect to your OpenClaw Gateway."
+        case .notConnected: return "Not connected to an OpenClaw Gateway."
+        case .larryNotInstalled: return "No agent with the Larry skill found. Select an agent in Settings."
         case .campaignRunFailed: return "Failed to run the campaign."
         }
     }
-}
-
-struct SkillInfo: Codable {
-    let id: String
-    let name: String
-    let version: String
-}
-
-struct CampaignRunPayload: Codable {
-    let niche: String
-    let competitors: [String]
-    let postsToGenerate: Int
-    let imageStyle: String
-    let overlayConfig: OverlayConfig
-    let postizAccountId: String?
 }

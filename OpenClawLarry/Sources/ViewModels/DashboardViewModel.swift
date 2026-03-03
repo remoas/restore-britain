@@ -1,11 +1,13 @@
 import Foundation
-import Combine
 
 @MainActor
 final class DashboardViewModel: ObservableObject {
     @Published var metrics: DashboardMetrics = .empty
     @Published var isLoading = false
     @Published var errorMessage: String?
+
+    /// Latest analytics response from Larry (natural language).
+    @Published var analyticsReport: String = ""
 
     private let campaignStore: CampaignStore
     private let openClawService: OpenClawService
@@ -22,11 +24,10 @@ final class DashboardViewModel: ObservableObject {
         let campaigns = campaignStore.campaigns
         let activeCampaigns = campaigns.filter { $0.status == .active }
 
-        // Aggregate stats across all campaigns
+        // Aggregate stats from locally stored data
         let totalViews = campaigns.reduce(0) { $0 + $1.totalViews }
         let totalLikes = campaigns.reduce(0) { $0 + $1.totalLikes }
 
-        // Calculate today's posts
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         var postsToday = 0
@@ -42,10 +43,8 @@ final class DashboardViewModel: ObservableObject {
             }
         }
 
-        // Find top performing campaign
         let topCampaign = campaigns.max(by: { $0.totalViews < $1.totalViews })
 
-        // Build weekly trend (last 7 days placeholder)
         let weeklyTrend = (0..<7).map { daysAgo -> MetricDataPoint in
             let date = calendar.date(byAdding: .day, value: -daysAgo, to: today) ?? today
             return MetricDataPoint(date: date, value: Double(totalViews / max(7 - daysAgo, 1)))
@@ -63,12 +62,12 @@ final class DashboardViewModel: ObservableObject {
             revenueEstimate: Double(totalLikes) * 0.002
         )
 
-        // Refresh analytics from OpenClaw if connected
+        // Ask Larry for a fresh analytics report if connected
         if openClawService.connectionStatus.isConnected {
             for campaign in activeCampaigns {
                 do {
-                    let updatedPosts = try await openClawService.fetchAnalytics(for: campaign.id)
-                    campaignStore.addPosts(updatedPosts, for: campaign.id)
+                    let report = try await openClawService.fetchAnalytics(for: campaign)
+                    analyticsReport = report
                 } catch {
                     // Analytics refresh is best-effort
                 }
